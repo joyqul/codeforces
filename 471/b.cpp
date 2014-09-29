@@ -8,7 +8,9 @@ using namespace std;
 struct NODE {
     int num, weight;
 } difficult[MAX];
+
 int n;
+int first[MAX], second[MAX], third[MAX];
 
 bool cmp(NODE a, NODE b) {
     return a.weight < b.weight;
@@ -21,70 +23,57 @@ int main () {
         difficult[i].num = i+1;
     }
     sort(difficult, difficult+n, cmp);
-    int way = 1, pre = 1;
-    for (int i = 1; i < n; ++i) {
-        if (difficult[i].weight == difficult[i-1].weight) ++pre;
+
+    bool has_second = false, has_third = false;
+    for (int i = 0; i < n; ++i) {
+        if (has_second && has_third) {
+            first[i] = second[i] = third[i] = difficult[i].num;
+        }
+        else if (i+1 < n && difficult[i].weight == difficult[i+1].weight) {
+            if (has_second) {
+                has_third = true;
+                first[i] = second[i] = third[i+1] = difficult[i].num;
+                first[i+1] = second[i+1] = third[i] = difficult[i+1].num;
+                ++i;
+            }
+            else {
+                if (i+2 < n && difficult[i].weight == difficult[i+2].weight) {
+                    has_second = has_third = true;
+                    first[i] = second[i+1] = third[i] = difficult[i].num;
+                    first[i+1] = second[i] = third[i+2] = difficult[i+1].num;
+                    first[i+2] = second[i+2] = third[i+1] = difficult[i+2].num;
+                    i += 2;
+                }
+                else {
+                    has_second = true;
+                    first[i] = second[i+1] = third[i] = difficult[i].num;
+                    first[i+1] = second[i] = third[i+1] = difficult[i+1].num;
+                    ++i;
+                }
+            }
+        }
         else {
-            way *= pre;
-            pre = 1;
+            first[i] = second[i] = third[i] = difficult[i].num;
         }
     }
-    way *= pre;
-    if (way >= 3) {
+
+    if (has_third) {
         cout << "YES" << endl;
-        // first, origin
-        cout << difficult[0].num;
+        cout << first[0];
         for (int i = 1; i < n; ++i) {
-            cout << " " << difficult[i].num;
+            cout << " " << first[i];
         }
         cout << endl;
 
-        // second
-        if (difficult[0].weight == difficult[1].weight) {
-            cout << difficult[1].num << " " << difficult[0].num;
-            for (int i = 2; i < n; ++i) {
-                cout << " " << difficult[i].num;
-            }
-            cout << endl;
+        cout << second[0];
+        for (int i = 1; i < n; ++i) {
+            cout << " " << second[i];
         }
-        else {
-            cout << difficult[0].num;
-            int i;
-            for (i = 1; i < n-1; ++i) {
-                if (difficult[i].weight == difficult[i+1].weight) {
-                    cout << " " << difficult[i+1].num << " " << difficult[i].num;
-                    break;
-                }
-                cout << " " <<  difficult[i].num;
-            }
-            i += 2;
-            while (i < n) {
-                cout << " " << difficult[i].num;
-                ++i;
-            }
-            cout << endl;
-        }
+        cout << endl;
 
-        // third
-        int i;
-        cout << difficult[0].num;
-        for (i = 1; i < n; ++i) {
-            cout << " " << difficult[i].num;
-            if (difficult[i].weight == difficult[i-1].weight) {
-                break;
-            }
-        }
-        i += 2;
-        for (; i < n; ++i) {
-            if (difficult[i].weight == difficult[i-1].weight) {
-                cout << " " << difficult[i].num << " " << difficult[i-1].num;
-                ++i;
-                break;
-            }
-            cout << " " << difficult[i-1].num;
-        }
-        for (; i < n; ++i) {
-            cout << " " << difficult[i].num;
+        cout << third[0];
+        for (int i = 1; i < n; ++i) {
+            cout << " " << third[i];
         }
         cout << endl;
     }
